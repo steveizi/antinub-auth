@@ -1,19 +1,4 @@
-### Linux.gitignore ###
-*~
-
-# KDE directory preferences
-.directory
-
-# Linux trash folder which might appear on any partition or disk
-.Trash-*
-
-
-### NotepadPP.gitignore ###
-# Notepad++ backups #
-*.bak
-
-
-### Python.gitignore ###
+######### Python.gitignore #########
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -70,7 +55,62 @@ docs/_build/
 # PyBuilder
 target/
 
-### Windows.gitignore ###
+
+######### Eclipse.gitignore #########
+*.pydevproject
+.metadata
+.gradle
+bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.settings/
+.loadpath
+
+# Eclipse Core
+.project
+
+# External tool builders
+.externalToolBuilders/
+
+# Locally stored "Eclipse launch configurations"
+*.launch
+
+# CDT-specific
+.cproject
+
+# JDT-specific (Eclipse Java Development Tools)
+.classpath
+
+# PDT-specific
+.buildpath
+
+# sbteclipse plugin
+.target
+
+# TeXlipse plugin
+.texlipse
+
+
+######### Linux.gitignore #########
+*~
+
+# KDE directory preferences
+.directory
+
+# Linux trash folder which might appear on any partition or disk
+.Trash-*
+
+
+######### NotepadPP.gitignore #########
+# Notepad++ backups #
+*.bak
+
+
+######### Windows.gitignore #########
 # Windows image file caches
 Thumbs.db
 ehthumbs.db
