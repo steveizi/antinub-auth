@@ -31,7 +31,7 @@
 	</div>
 	<div id="navbar" class="collapse navbar-collapse">
 		<ul class="nav navbar-nav">
-			{% if not user.is_authenticated %}
+			{% if user.is_authenticated %}
 				<li data-link-name="account"><a href="#">Account</a></li>
 				<li data-link-name="services"><a href="#">Services</a></li>
 			{% endif %}
