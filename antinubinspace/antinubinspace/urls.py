@@ -2,10 +2,15 @@ from django.conf.urls import patterns, include, url
 from django.contrib import admin
 
 urlpatterns = patterns('',
-    # Examples:
-    # url(r'^$', 'antinubinspace.views.home', name='home'),
-    # url(r'^blog/', include('blog.urls')),
-    
-    url(r'^$', 'aniauth.views.index', name='index'),
+    # Admin urls
     url(r'^admin/', include(admin.site.urls)),
+    
+    # Index
+    url(r'^$', 'aniauth.views.register', name='register'),
+    ### url(r'^$', 'portal.views.index', name='index'),
+    
+    # Auth
+    url(r'^account/register/', 'aniauth.views.register', name='register'),
+    url(r'^account/login/', 'aniauth.views.login', name='login'),
+    url(r'^account/logout/', 'aniauth.views.logout', name='logout'),
 )

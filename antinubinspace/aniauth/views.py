@@ -1,6 +1,11 @@
-from django.template import RequestContext
-from django.shortcuts import render_to_response
+from django.shortcuts import render
 
 
-def index(request):
-    return render_to_response('index.html', None, context_instance=RequestContext(request))
+def register(request):
+    return render(request, "account.html")
+
+def login(request):
+    return render(request, "account.html")
+
+def logout(request):
+    return render(request, "account.html")
