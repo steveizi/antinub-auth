@@ -1,0 +1,121 @@
+{% load staticfiles %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>{% block title %}EMPTY TITLE{% endblock title %}</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+  <link href="{% static 'css/tweaks.css' %}" rel="stylesheet">
+  <link href="{% static 'css/offcanvas.css' %}" rel="stylesheet">
+</head>
+<body>
+<span id="_pageName" style="display:none">{% block pagename %}{% endblock %}</span>
+<span id="_subPageName" style="display:none">{% block subpagename %}{% endblock %}</span>
+
+<nav class="navbar navbar-default" style="border-radius: 0px !important;">
+    <div class="container-fluid">
+        
+        <div class="navbar-header">
+            {% comment "TODO" %}Make corp/alliance logo and name come from EVE API{% endcomment %}
+            <a class="navbar-brand" href="/">
+                <img src="https://image.eveonline.com/Corporation/98199571_64.png" width="58" height="58" style="position: relative; top: -19px;">
+            </a>
+            <a class="navbar-brand visible-xs-block visible-sm-block" href="/">[A-NI]</a>
+            <a class="navbar-brand visible-md-block visible-lg-block" href="/">Anti-Nub Incorporated</a>
+        </div>
+        
+        <ul class="nav navbar-nav navbar-left visible-sm-block visible-md-block visible-lg-block">
+            {% if user.is_authenticated %}
+                <li data-link-name="account"><a href="#">Account</a></li>
+                <li data-link-name="services"><a href="#">Services</a></li>
+            {% endif %}
+            <li><a href="http://fleet-up.com/">Fleet-Up</a></li>
+            <li><a href="https://anti-nub.zkillboard.com/">Killboard</a></li>
+            {% comment "TODO" %}Put a sensible permission here{% endcomment %}
+            {% if perms.aniauth.isDirector %}
+                <li data-link-name="director"><a href="#"><span class="glyphicon glyphicon-star" aria-hidden="true"></span> Director</a></li>
+            {% endif %}
+        </ul>
+        
+        <ul class="nav navbar-nav navbar-right">
+            <li class=" dropdown visible-xs-block">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+                    <span class="sr-only">Menu</span>
+                    <span class="glyphicon glyphicon-menu-hamburger" aria-hidden="true"></span>
+                    <span class="caret"></span>
+                </a>
+                <ul class="dropdown-menu" role="menu">
+                    {% if user.is_authenticated %}
+                        <li data-link-name="account"><a href="#">Account</a></li>
+                        <li data-link-name="services"><a href="#">Services</a></li>
+                    {% endif %}
+                    <li><a href="http://fleet-up.com/">Fleet-Up</a></li>
+                    <li><a href="https://anti-nub.zkillboard.com/">Killboard</a></li>
+                    {% comment "TODO" %}Put a sensible permission here{% endcomment %}
+                    {% if perms.aniauth.isDirector %}
+                        <li data-link-name="director"><a href="#"><span class="glyphicon glyphicon-star" aria-hidden="true"></span> Director</a></li>
+                    {% endif %}
+                </ul>
+            </li>
+            <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">
+                    <span class="sr-only">Login</span>
+                    <span class="glyphicon glyphicon-lock" aria-hidden="true"></span> Login
+                    <span class="caret"></span>
+                </a>
+                <ul class="dropdown-menu" style="padding: 15px; min-width: 250px;" role="menu">
+                    <form class="form" role="login" method="POST" action="{% url 'aniauth.views.login' %}">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label class="sr-only" for="navInputEmail">Email address</label>
+                            <input id="navInputEmail" type="email" placeholder="Email" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label class="sr-only" for="navInputPassword">Password</label>
+                            <input id="navInputPassword" type="password" placeholder="Password" class="form-control">
+                        </div>
+                        <input type="hidden" name="next" value="{{ next }}">
+                        <button type="submit" class="btn btn-success">Login</button>
+                        <a class="btn btn-info" href="{% url 'aniauth.views.register' %}">
+                            <span class="glyphicon glyphicon-user" aria-hidden="true"></span> Register
+                        </a>
+                    </form>
+                </ul>
+            </li>
+        </ul>
+        
+    </div><!-- container -->
+</nav>
+
+
+<div class="container-fluid">
+    <div class="row row-offcanvas row-offcanvas-left">
+        <div class="col-xs-6 col-sm-3 sidebar-offcanvas" id="sidebar">
+            <div class="list-group">
+               {% block subnav %}{% endblock subnav %}
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-9">
+            <p class="pull-left visible-xs">
+                <span class="sr-only">Toggle navigation</span>
+                <button type="button" class="btn btn-primary btn-xs" data-toggle="offcanvas">
+                    <span class="sr-only">Navigation</span>
+                    <span class="glyphicon glyphicon-option-horizontal" aria-hidden="true"></span>
+                </button>
+            </p>
+            <div class="jumbotron">
+            {% block contentHeader %}{% endblock contentHeader %}
+        </div>
+        {% block content %}{% endblock content %}
+    </div><!-- row -->
+</div><!-- container -->
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<script src="{% static 'js/bootstrap.min.js' %}"></script>
+<script src="{% static 'js/offcanvas.js' %}"></script>
+<script src="{% static 'js/activenav.js' %}"></script>
+
+</body>
+</html>
