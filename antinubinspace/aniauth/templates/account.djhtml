@@ -1,7 +1,7 @@
 {% extends "base.djhtml" %}
 
 {% block pagename %}account{% endblock %}
-{% block subpagename %}apikeys{% endblock %}
+{% block subpagename %}profile{% endblock %}
 
 {% block subnav %}
 	<a data-link-name="profile" class="list-group-item" href="#">Profile</a>
