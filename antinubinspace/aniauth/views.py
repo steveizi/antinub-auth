@@ -1,41 +1,35 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import login as auth_login
-from django.contrib.auth import logout as auth_logout
-from django.contrib.auth import authenticate
-from django.contrib import messages
+
+from django.contrib.auth.decorators import login_required
+#from aniauth.forms import RegistrationForm
 
 
-# TODO: Tasks marked in base.djhtml
-
-# WORK VIEWS - User shouldn't actually load these.
+# WORK VIEWS - User shouldn't actually end up on these pages.
 def account(request):
     return redirect('/account/profile')
 
-def login(request):
-    if request.method == 'POST':
-        email = request.POST['email']
-        password = request.POST['password']
-        next_url = request.POST['next_url']
-        user = authenticate(email=email, password=password)
-        if user is not None:
-            if user.is_active:
-                auth_login(request, user)
-                return redirect(next_url)
-            else:
-                return redirect(next_url)
-        
-        return redirect(next_url)
-    else:
-        return redirect('/')
-
-def logout(request):
-    auth_logout(request)
-    return redirect('/')
-
 
 # REAL views
+"""
 def register(request):
-    return render(request, "account.djhtml")
+    if request.method == 'POST':
+        form = RegistrationForm(request.POST)
+        
+        if form.is_valid():
+            user = authenticate(email=form.cleaned_data.get('email'), password=form.cleaned_data.get('password'))
+            if user is not None:
+                if user.is_active:
+                    auth_login(request, user)
+                    return redirect("/")
+            
+            form.add_error(None, ValidationError('Invalid Email/Password combination', code='invalid'))
+            return render(request, "login.djhtml", {'form': form})
+    else:
+        form = LoginForm()
+    
+    return render(request, "login.djhtml", {'form': form})
+"""
+def register(request): return render(request, "account_base.djhtml")
 
-def profile(request):
-    return render(request, "account.djhtml")
+@login_required
+def profile(request): return render(request, "account_base.djhtml")
