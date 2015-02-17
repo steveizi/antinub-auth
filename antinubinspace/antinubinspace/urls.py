@@ -8,7 +8,7 @@ urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
     
     # Index
-    url(r'^$', 'aniauth.views.register', name='home'),
+    url(r'^$', 'aniauth.views.profile', name='home'),
     ### url(r'^$', 'portal.views.index', name='index'),
     
     # Auth
@@ -17,7 +17,7 @@ urlpatterns = patterns('',
         r'^account/login/$',
         'django.contrib.auth.views.login',
         {
-            'template_name': 'login.djhtml',
+            'template_name': 'account/login.djhtml',
             'authentication_form': LoginForm,
         },
          name='login'),
@@ -25,7 +25,8 @@ urlpatterns = patterns('',
         'django.contrib.auth.views.logout',
         {'next_page': 'home'},
         name='logout'),
-    
+        
     url(r'^account/register/$', 'aniauth.views.register', name='register'),
+    url(r'^account/activate/$', 'aniauth.views.activate', name='activate'),
     url(r'^account/profile/$', 'aniauth.views.profile', name='profile'),
 )

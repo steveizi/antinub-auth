@@ -2,7 +2,10 @@
 from __future__ import unicode_literals
 
 from django.db import models, migrations
+import datetime
+from django.utils.timezone import utc
 import django.utils.timezone
+from django.conf import settings
 
 
 class Migration(migrations.Migration):
@@ -29,6 +32,18 @@ class Migration(migrations.Migration):
             options={
                 'verbose_name': 'user',
                 'verbose_name_plural': 'users',
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='ConfirmationKey',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('activation_key', models.CharField(max_length=32)),
+                ('key_expiration', models.DateTimeField(default=datetime.datetime(2015, 2, 19, 15, 24, 23, 620000, tzinfo=utc))),
+                ('user', models.OneToOneField(to=settings.AUTH_USER_MODEL)),
+            ],
+            options={
             },
             bases=(models.Model,),
         ),

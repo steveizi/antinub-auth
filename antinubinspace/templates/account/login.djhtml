@@ -1,0 +1,38 @@
+{% extends "base.djhtml" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Login{% endblock title %}
+{% block pageName %}login{% endblock pageName %}
+{% block subPageName %}login{% endblock subPageName %}
+
+{% block sidebar %}
+  <div class="panel panel-info">
+    <div class="panel-heading">
+      <h3 class="panel-title">Why am I here?</h3>
+    </div>
+    <div class="panel-body">
+      <p>You probably tried to do something that requires you to be logged in.</p>
+      <p>If you do not have an account you can register for one by clicking below.</p>
+      <a class="btn btn-default" href="{% url 'register' %}", role="button">
+        <span class="glyphicon glyphicon-user" aria-hidden="true"></span> Register
+      </a>
+    </div><!-- panel-body -->
+  </div><!-- panel-info -->
+{% endblock sidebar %}
+
+{% block content %}
+  <div class="panel panel-primary">
+    <div class="panel-heading">
+      <h2 class="panel-title">Sign In</h2>
+    </div>
+    <div class="panel-body">
+      {% if user.is_authenticated %}
+        <p>You are probably here by mistake as you are already logged in.</p>
+        <p>Click below to be returned to the homepage or use the links at the top to find what you're looking for.</p>
+        <a class="btn btn-primary" href="{% url 'home' %}", role="button">Home</a>
+      {% else %}
+        {% crispy form %}
+      {% endif %}
+    </div>
+  </div><!-- panel -->
+{% endblock content %}

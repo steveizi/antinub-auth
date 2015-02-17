@@ -1,13 +1,14 @@
-from django.db import models
-from django.utils.translation import ugettext_lazy as _
-from django.utils import timezone
-from django.core.mail import send_mail
+from datetime import timedelta as tdelta
 
 from django.contrib.auth.models import (
     BaseUserManager,
     AbstractBaseUser,
     PermissionsMixin,
 )
+from django.core.mail import send_mail
+from django.db import models
+from django.utils import timezone
+from django.utils.translation import ugettext_lazy as _
 
 
 class ANIUserManager(BaseUserManager):
@@ -83,3 +84,13 @@ class ANIUser(AbstractBaseUser, PermissionsMixin):
         Sends an email to this User.
         """
         send_mail(subject, message, from_email, [self.email], **kwargs)
+    
+    
+def now_plus_two():
+        # Helper function for ConfirmationKey model
+        return timezone.now() + tdelta(days=2)
+    
+class ConfirmationKey(models.Model):
+    user = models.OneToOneField(ANIUser)
+    activation_key = models.CharField(max_length=32)
+    key_expiration = models.DateTimeField(default=now_plus_two)

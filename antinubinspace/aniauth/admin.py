@@ -2,45 +2,46 @@ from django import forms
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.forms import ReadOnlyPasswordHashField
-from django.utils.translation import ugettext, ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as _
 
-from aniauth.models import ANIUser
+from aniauth.models import ANIUser, ConfirmationKey
 
 
 class UserCreationForm(forms.ModelForm):
-    """
-    A form that creates a user, with no privileges, from the given email and
-    password.
-    """
-    error_messages = {
-        'password_mismatch': _("The two password fields didn't match."),
-    }
-    password1 = forms.CharField(label=_("Password"),
-        widget=forms.PasswordInput)
-    password2 = forms.CharField(label=_("Password confirmation"),
-        widget=forms.PasswordInput,
-        help_text=_("Enter the same password as above, for verification."))
+    """A form for creating new users. Includes all the required
+    fields, plus a repeated password."""
+    password1 = forms.CharField(label='Password', widget=forms.PasswordInput)
+    password2 = forms.CharField(label='Password confirmation', widget=forms.PasswordInput)
 
     class Meta:
         model = ANIUser
-        fields = ("email",)
+        fields = ('email',)
 
     def clean_password2(self):
+        # Check that the two password entries match
         password1 = self.cleaned_data.get("password1")
         password2 = self.cleaned_data.get("password2")
         if password1 and password2 and password1 != password2:
-            raise forms.ValidationError(
-                self.error_messages['password_mismatch'],
-                code='password_mismatch',
-            )
+            raise forms.ValidationError("Passwords didn't match")
         return password2
 
-    def save(self, commit=True):
+    def save(self, commit=True, skip_activation=True):
+        # Save the provided password in hashed format
         user = super(UserCreationForm, self).save(commit=False)
         user.set_password(self.cleaned_data["password1"])
+        user.is_active = skip_activation # No email confirmation required by default.
         if commit:
             user.save()
+            self.send_activation_email(user)
         return user
+    
+    def send_activation_email(self, user):
+        if user.is_active:
+            # User account is already active, no email will be sent.
+            return
+        else:
+            # User account requires activation
+            return
 
 
 class UserChangeForm(forms.ModelForm):
@@ -66,6 +67,10 @@ class UserChangeForm(forms.ModelForm):
         return self.initial["password"]
 
 
+class ConfirmationKeyInline(admin.TabularInline):
+    model = ConfirmationKey
+
+
 class ANIUserAdmin(UserAdmin):
     # The forms to add and change user instances
     form = UserChangeForm
@@ -74,7 +79,7 @@ class ANIUserAdmin(UserAdmin):
     # The fields to be used in displaying the User model.
     # These override the definitions on the base UserAdmin
     # that reference specific fields on auth.User.
-    list_display = ('email', 'is_staff')
+    list_display = ('email', 'is_active', 'is_staff')
     list_filter = ('is_staff', 'is_superuser', 'is_active', 'groups')
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
@@ -90,6 +95,7 @@ class ANIUserAdmin(UserAdmin):
             'fields': ('email', 'password1', 'password2')}
         ),
     )
+    inlines = [ConfirmationKeyInline]
     search_fields = ('email',)
     ordering = ('email',)
     filter_horizontal = ('groups', 'user_permissions',)
