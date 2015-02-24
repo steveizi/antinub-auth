@@ -1,10 +1,15 @@
-from django import forms
-from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin
-from django.contrib.auth.forms import ReadOnlyPasswordHashField
-from django.utils.translation import ugettext_lazy as _
+import hashlib
+import random
 
-from aniauth.models import ANIUser, ConfirmationKey
+from django import forms
+from django.conf import settings
+from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin as admin_UserAdmin
+from django.contrib.auth.forms import ReadOnlyPasswordHashField
+from django.core.mail import send_mail
+from django.shortcuts import resolve_url
+
+from accounts.models import User, ActivationKey
 
 
 class UserCreationForm(forms.ModelForm):
@@ -14,7 +19,7 @@ class UserCreationForm(forms.ModelForm):
     password2 = forms.CharField(label='Password confirmation', widget=forms.PasswordInput)
 
     class Meta:
-        model = ANIUser
+        model = User
         fields = ('email',)
 
     def clean_password2(self):
@@ -32,26 +37,44 @@ class UserCreationForm(forms.ModelForm):
         user.is_active = skip_activation # No email confirmation required by default.
         if commit:
             user.save()
-            self.send_activation_email(user)
+            if not skip_activation:
+                self.create_activation_key(user)
+                self.send_activation_email(user)
         return user
     
-    def send_activation_email(self, user):
-        if user.is_active:
-            # User account is already active, no email will be sent.
-            return
-        else:
-            # User account requires activation
-            return
+    @staticmethod
+    def create_activation_key(user):
+        salt = hashlib.sha1(str(random.random())).hexdigest()[:-5]
+        activation_key = hashlib.sha1(salt+user.email).hexdigest()
+        # Key expires in 48 hours by default.
+        
+        confirmation_key, _ = ActivationKey.objects.update_or_create(
+            user=user, value=activation_key)
+        
+        return confirmation_key
+    
+    @staticmethod
+    def send_activation_email(user):
+        # TODO: Use corp/alliance tag
+        email_subject = "[A-NI] Activate Your Account"
+        email_body = "Thanks for registering! To complete the activation of your account please click the following link:"
+        "\n{}?activation_key={}".format(resolve_url('activate'), user.activationkey)
+        "\n\nThis key will be valid for 48 hours from the time of registration."
+        
+        send_mail(email_subject, email_body, settings.DEFAULT_FROM_EMAIL,
+                  [user.email], fail_silently=False)
+        
+        return user
 
 
 class UserChangeForm(forms.ModelForm):
-    password = ReadOnlyPasswordHashField(label=_("Password"),
-        help_text=_("Raw passwords are not stored, so there is no way to see "
+    password = ReadOnlyPasswordHashField(label="Password",
+        help_text="Raw passwords are not stored, so there is no way to see "
                     "this user's password, but you can change the password "
-                    "using <a href=\"password/\">this form</a>."))
+                    "using <a href=\"password/\">this form</a>.")
 
     class Meta:
-        model = ANIUser
+        model = User
         fields = '__all__'
 
     def __init__(self, *args, **kwargs):
@@ -67,11 +90,11 @@ class UserChangeForm(forms.ModelForm):
         return self.initial["password"]
 
 
-class ConfirmationKeyInline(admin.TabularInline):
-    model = ConfirmationKey
+class ActivationKeyInline(admin.TabularInline):
+    model = ActivationKey
 
 
-class ANIUserAdmin(UserAdmin):
+class UserAdmin(admin_UserAdmin):
     # The forms to add and change user instances
     form = UserChangeForm
     add_form = UserCreationForm
@@ -83,9 +106,9 @@ class ANIUserAdmin(UserAdmin):
     list_filter = ('is_staff', 'is_superuser', 'is_active', 'groups')
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
-        (_('Permissions'), {'fields': ('is_active', 'is_staff', 'is_superuser',
+        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser',
                                        'groups', 'user_permissions')}),
-        (_('Important dates'), {'fields': ('last_login', 'date_joined')}),
+        ('Important dates', {'fields': ('last_login', 'date_joined')}),
     )
     # add_fieldsets is not a standard ModelAdmin attribute. UserAdmin
     # overrides get_fieldsets to use this attribute when creating a user.
@@ -95,11 +118,11 @@ class ANIUserAdmin(UserAdmin):
             'fields': ('email', 'password1', 'password2')}
         ),
     )
-    inlines = [ConfirmationKeyInline]
+    inlines = [ActivationKeyInline]
     search_fields = ('email',)
     ordering = ('email',)
     filter_horizontal = ('groups', 'user_permissions',)
 
 
 # Now register the new UserAdmin...
-admin.site.register(ANIUser, ANIUserAdmin)
+admin.site.register(User, UserAdmin)

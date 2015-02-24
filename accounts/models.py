@@ -1,5 +1,6 @@
 from datetime import timedelta as tdelta
 
+from django.conf import settings
 from django.contrib.auth.models import (
     BaseUserManager,
     AbstractBaseUser,
@@ -8,10 +9,9 @@ from django.contrib.auth.models import (
 from django.core.mail import send_mail
 from django.db import models
 from django.utils import timezone
-from django.utils.translation import ugettext_lazy as _
 
 
-class ANIUserManager(BaseUserManager):
+class UserManager(BaseUserManager):
     use_in_migrations = True
 
     def _create_user(self, email, password,
@@ -40,32 +40,32 @@ class ANIUserManager(BaseUserManager):
                                  **extra_fields)
 
 
-class ANIUser(AbstractBaseUser, PermissionsMixin):
+class User(AbstractBaseUser, PermissionsMixin):
     """
     An class implementing a fully featured ANIUser model with
     admin-compliant permissions.
     Email and password are required. Other fields are optional.
     """
-    email = models.EmailField(_('email address'), unique=True,
+    email = models.EmailField('email address', unique=True,
         error_messages={
-            'unique': _("A user with that email already exists."),
+            'unique': "A user with that email already exists.",
         })
-    is_staff = models.BooleanField(_('staff status'), default=False,
-        help_text=_('Designates whether the user can log into this admin '
-                    'site.'))
-    is_active = models.BooleanField(_('active'), default=True,
-        help_text=_('Designates whether this user should be treated as '
-                    'active. Unselect this instead of deleting accounts.'))
-    date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
+    is_staff = models.BooleanField('staff status', default=False,
+        help_text='Designates whether the user can log into this admin '
+                    'site.')
+    is_active = models.BooleanField('active', default=True,
+        help_text='Designates whether this user should be treated as '
+                    'active. Unselect this instead of deleting accounts.')
+    date_joined = models.DateTimeField('date joined', default=timezone.now)
 
-    objects = ANIUserManager()
+    objects = UserManager()
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
 
     class Meta:
-        verbose_name = _('user')
-        verbose_name_plural = _('users')
+        verbose_name = 'user'
+        verbose_name_plural = 'users'
 
     def get_full_name(self):
         """
@@ -86,11 +86,14 @@ class ANIUser(AbstractBaseUser, PermissionsMixin):
         send_mail(subject, message, from_email, [self.email], **kwargs)
     
     
-def now_plus_two():
+def activation_timeout():
         # Helper function for ConfirmationKey model
-        return timezone.now() + tdelta(days=2)
+        return timezone.now() + tdelta(days=settings.ACTIVATION_KEY_TIMEOUT_DAYS)
     
-class ConfirmationKey(models.Model):
-    user = models.OneToOneField(ANIUser)
-    activation_key = models.CharField(max_length=32)
-    key_expiration = models.DateTimeField(default=now_plus_two)
+class ActivationKey(models.Model):
+    user = models.OneToOneField(User)
+    value = models.CharField(max_length=40)
+    expiration = models.DateTimeField(default=activation_timeout)
+    
+    def __str__(self):
+        return self.value

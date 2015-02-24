@@ -5,12 +5,38 @@ from django import forms
 from django.contrib.auth.forms import AuthenticationForm
 from django.utils import timezone
 
-from aniauth.admin import UserCreationForm
-from aniauth.models import ConfirmationKey
+from accounts.admin import UserCreationForm
+from accounts.models import ActivationKey
 
 
 class LoginForm(AuthenticationForm):
     username = forms.EmailField(max_length=254)
+    
+    error_messages = {
+        'invalid_login': "Please enter a correct email and password. "
+                         "Note that both fields may be case-sensitive.",
+        'inactive': "This has not yet been activated. "
+                    "Another activation email has been sent.",
+    }
+    
+    def confirm_login_allowed(self, user):
+        """
+        Controls whether the given User may log in. This is a policy setting,
+        independent of end-user authentication. This default behavior is to
+        allow login by active users, and reject login by inactive users.
+
+        If the given user cannot log in, this method should raise a
+        ``forms.ValidationError``.
+
+        If the given user may log in, this method should return None.
+        """
+        if not user.is_active:
+            raise forms.ValidationError(
+                self.error_messages['inactive'],
+                code='inactive',
+            )
+            UserCreationForm.create_activation_key(self.user)
+            UserCreationForm.send_activation_email(self.user)
           
     helper = FormHelper()
     helper.form_show_labels = False
@@ -39,8 +65,7 @@ class RegistrationForm(UserCreationForm):
     
     
 class ActivationForm(forms.Form):
-    activation_key = forms.CharField(min_length=32, max_length=32, required=True)
-    user = None
+    activation_key = forms.CharField(min_length=40, max_length=40, required=True)
     
     error_messages = {
         'invalid_key': "This key is not valid.",
@@ -51,20 +76,21 @@ class ActivationForm(forms.Form):
         activation_key = self.cleaned_data.get('activation_key')
         
         try:
-            valid_key = ConfirmationKey.objects.get(activation_key=activation_key)
-        except ConfirmationKey.DoesNotExist:
+            valid_key = ActivationKey.objects.get(value=activation_key)
+        except ActivationKey.DoesNotExist:
             raise forms.ValidationError(
                 self.error_messages['invalid_key'],
                 code='invalid_key',
             )
         
         self.user = valid_key.user
-        if valid_key.key_expiration < timezone.now():
+        if valid_key.expiration < timezone.now():
             raise forms.ValidationError(
                 self.error_messages['expired_key'],
                 code='expired_key',
             )
-            # TODO: Send a new key to the user
+            UserCreationForm.create_activation_key(self.user)
+            UserCreationForm.send_activation_email(self.user)
         
         return activation_key
     
@@ -73,6 +99,7 @@ class ActivationForm(forms.Form):
         
         self.user.is_active = True # Activate the user
         self.user.save()
+        self.user.activationkey.delete() # Clear the now used activation key.
     
     helper = FormHelper()
     helper.form_show_labels = False

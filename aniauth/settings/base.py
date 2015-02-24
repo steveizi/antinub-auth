@@ -1,5 +1,5 @@
 """
-Django settings for antinubinspace project.
+Django settings for aniauth project.
 
 For more information on this file, see
 https://docs.djangoproject.com/en/1.7/topics/settings/
@@ -10,63 +10,66 @@ https://docs.djangoproject.com/en/1.7/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+SETTINGS_ROOT = os.path.abspath(os.path.dirname(__file__))
+PROJECT_APP_ROOT = os.path.abspath(os.path.dirname(SETTINGS_ROOT))
+PROJECT_ROOT = os.path.abspath(os.path.dirname(PROJECT_APP_ROOT))
+PUBLIC_ROOT = os.path.abspath(os.path.join(PROJECT_ROOT, 'public'))
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/1.7/howto/deployment/checklist/
-AUTH_USER_MODEL='aniauth.ANIUser'
-TEMPLATE_DIRS = [os.path.join(BASE_DIR, 'templates')]
-print TEMPLATE_DIRS
-
-from django.contrib import messages
-MESSAGE_TAGS = {
-    messages.constants.ERROR: 'danger',
-}
-
+# Production Settings
+# Core
+ADMINS = (
+    ('root', 'root@localhost'),
+)
+TEMPLATE_DIRS = (
+    os.path.join(PROJECT_ROOT, 'templates'),
+)
 TEMPLATE_LOADERS = (
     ('django.template.loaders.cached.Loader', (
         'django.template.loaders.filesystem.Loader',
         'django.template.loaders.app_directories.Loader',
     )),
 )
-
+# Auth
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+AUTH_USER_MODEL = 'accounts.User'
+LOGIN_REDIRECT_URL = 'profile'
+LOGIN_URL = 'login'
+ACTIVATE_URL = 'activate'
+ACTIVATION_KEY_TIMEOUT_DAYS = 2
+# Crispy Forms
 CRISPY_TEMPLATE_PACK = 'bootstrap3'
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/1.7/howto/static-files/
-
-STATIC_URL = '/static/'
-STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, "static"),
-)
-
 # SECURITY WARNING: keep the secret key used in production secret!
-# TODO: Make settings load sensitive data from file
-SECRET_KEY = 'CHANGE ME'
+with open(os.path.join(SETTINGS_ROOT, 'secret_key')) as f:
+    SECRET_KEY = f.read().strip()
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-TEMPLATE_DEBUG = True
-
-ALLOWED_HOSTS = []
+TEMPLATE_DEBUG = False
 
 
 # Application definition
 
-INSTALLED_APPS = (
+PREREQ_APPS = [
+    'crispy_forms',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'crispy_forms',
-    'aniauth',
-)
+]
 
-MIDDLEWARE_CLASSES = (
+PROJECT_APPS = [
+    'accounts',
+]
+
+INSTALLED_APPS = PREREQ_APPS + PROJECT_APPS
+
+MIDDLEWARE_CLASSES = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -74,16 +77,11 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-)
+]
 
-from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS
-TEMPLATE_CONTEXT_PROCESSORS += (
-    'django.core.context_processors.request',
-)
+ROOT_URLCONF = 'aniauth.urls'
 
-ROOT_URLCONF = 'antinubinspace.urls'
-
-WSGI_APPLICATION = 'antinubinspace.wsgi.application'
+WSGI_APPLICATION = 'aniauth.wsgi.application'
 
 
 # Database
@@ -92,7 +90,7 @@ WSGI_APPLICATION = 'antinubinspace.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'NAME': os.path.join(PROJECT_ROOT, 'db.sqlite3'),
     }
 }
 
@@ -108,3 +106,22 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
+
+
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/1.7/howto/static-files/
+
+STATIC_URL = '/static/'
+MEDIA_URL = '/media/'
+
+STATIC_ROOT = os.path.join(PUBLIC_ROOT, 'static')
+MEDIA_ROOT = os.path.join(PUBLIC_ROOT, 'media')
+
+STATICFILES_DIRS = (
+    os.path.join(PROJECT_ROOT, 'static'),
+)
+
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+)

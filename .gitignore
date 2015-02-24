@@ -45,10 +45,10 @@ coverage.xml
 *.mo
 *.pot
 
-# Django stuff:
+# Django
 *.log
 *.sqlite3
-settings.py
+secret_key
 
 # Sphinx documentation
 docs/_build/
