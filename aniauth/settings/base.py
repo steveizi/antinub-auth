@@ -31,8 +31,6 @@ TEMPLATE_LOADERS = (
     )),
 )
 # Auth
-CSRF_COOKIE_SECURE = True
-SESSION_COOKIE_SECURE = True
 AUTH_USER_MODEL = 'accounts.User'
 LOGIN_REDIRECT_URL = 'profile'
 LOGIN_URL = 'login'
