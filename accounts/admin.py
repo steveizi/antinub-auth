@@ -59,9 +59,9 @@ class UserCreationForm(forms.ModelForm):
         email_subject = "[A-NI] Activate Your Account"
         email_body = ("Thanks for registering! To complete the activation of "
                       "your account please click the following link:"
-                      "\n{}?activation_key={}\n\nThis key will be valid for 48"
-                      " hours from the time of registration."
-                      ).format(resolve_url('activate'), user.activationkey)
+                      "\nhttp://{}{}?activation_key={}\n\nThis key will be "
+                      "valid for 48 hours from the time of registration."
+                      ).format(settings.HOST_DOMAIN, resolve_url('activate'), user.activationkey)
         
         send_mail(email_subject, email_body, settings.DEFAULT_FROM_EMAIL,
                   [user.email], fail_silently=False)
