@@ -3,7 +3,6 @@
 
 {% block title %}Login{% endblock title %}
 {% block pageName %}login{% endblock pageName %}
-{% block subPageName %}login{% endblock subPageName %}
 
 {% block sidebar %}
   <div class="panel panel-info">

@@ -3,7 +3,6 @@
 
 {% block title %}Register{% endblock title %}
 {% block pageName %}register{% endblock pageName %}
-{% block subPageName %}register{% endblock subPageName %}
 
 {% block sidebar %}
   <div class="panel panel-info">

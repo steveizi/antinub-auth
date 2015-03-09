@@ -1,0 +1,23 @@
+{% extends "base.djhtml" %}
+
+{% block title %}DASHBOARD TEMPLATE{% endblock title %}
+{% block pageName %}dashboard{% endblock pageName %}
+
+{% block sidebar %}
+<div class="list-group">
+  <a data-link-name="profile" class="list-group-item" href="#">Profile</a>
+  <a data-link-name="apikeys" class="list-group-item" href="#">API Keys</a>
+  <a data-link-name="characters" class="list-group-item" href="#">Characters</a>
+  <a data-link-name="groups" class="list-group-item" href="#">Groups</a>
+  <a data-link-name="settings" class="list-group-item" href="#">
+    <span class="glyphicon glyphicon-cog" aria-hidden="true"></span> Settings
+  </a>
+</div><!-- list-group -->
+{% endblock sidebar %}
+
+{% block content %}
+  <div class="jumbotron">
+    <h1>TEST AUTH</h1>
+    <p>please ignore</p>
+  </div><!-- jumbotron -->
+{% endblock content %}

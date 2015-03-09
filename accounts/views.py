@@ -1,9 +1,8 @@
 from django.conf import settings
 from django.contrib.auth import REDIRECT_FIELD_NAME
-from django.contrib.auth.decorators import login_required
 from django.contrib.sites.shortcuts import get_current_site
 from django.http import HttpResponseRedirect
-from django.shortcuts import render, resolve_url
+from django.shortcuts import resolve_url
 from django.template.response import TemplateResponse
 from django.utils.http import is_safe_url
 from django.views.decorators.cache import never_cache
@@ -91,6 +90,3 @@ def activate(request, template_name='accounts/activate.djhtml',
         context.update(extra_context)
     return TemplateResponse(request, template_name, context,
                             current_app=current_app)
-
-@login_required
-def profile(request): return render(request, "accounts/base.djhtml")

@@ -1,0 +1,14 @@
+{% extends "dashboard/base.djhtml" %}
+
+{% block title %}API Keys{% endblock title %}
+{% block subPageName %}apikeys{% endblock subPageName %}
+
+{% block content %}
+  <div class="panel panel-primary">
+    <div class="panel-heading">
+      <p class="panel-title">Key ID: 123456798</p>
+    </div>
+    <div class="panel-body">
+    </div>
+  </div><!-- panel -->
+{% endblock content %}

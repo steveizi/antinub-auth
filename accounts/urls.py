@@ -2,7 +2,6 @@ from django.conf.urls import patterns, url
 from accounts.forms import LoginForm
 
 urlpatterns = patterns('',
-    url(r'^$', 'accounts.views.profile'),
     url(r'^login/$',
         'django.contrib.auth.views.login',
         {
@@ -18,5 +17,4 @@ urlpatterns = patterns('',
         name='logout'),
     url(r'^register/$', 'accounts.views.register', name='register'),
     url(r'^activate/$', 'accounts.views.activate', name='activate'),
-    url(r'^profile/$', 'accounts.views.profile', name='profile'),
 )

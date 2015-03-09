@@ -44,7 +44,7 @@
           <ul class="nav navbar-nav">
             <!-- MAIN LINKS AT THE TOP OF THE PAGE -->
             {% if user.is_authenticated %}
-              <li data-link-name="account"><a href="{% url 'profile' %}">Account</a></li>
+              <li data-link-name="dashboard"><a href="{% url 'profile' %}">Dashboard</a></li>
               <li data-link-name="services"><a href="#">Services</a></li>
               <li><a href="http://fleet-up.com/">Fleet-Up</a></li>
             {% endif %}
