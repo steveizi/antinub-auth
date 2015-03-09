@@ -102,12 +102,13 @@ class ActivationForm(forms.Form):
         self.user = valid_user
         
         if valid_key.expiration < timezone.now():
+            UserCreationForm.create_activation_key(self.user)
+            UserCreationForm.send_activation_email(self.user)
+            
             raise forms.ValidationError(
                 self.error_messages['expired_key'],
                 code='expired_key',
             )
-            UserCreationForm.create_activation_key(self.user)
-            UserCreationForm.send_activation_email(self.user)
         
         return activation_key
     
