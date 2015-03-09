@@ -6,7 +6,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.utils import timezone
 
 from accounts.admin import UserCreationForm
-from accounts.models import ActivationKey
+from accounts.models import User
 
 
 class LoginForm(AuthenticationForm):
@@ -31,12 +31,13 @@ class LoginForm(AuthenticationForm):
         If the given user may log in, this method should return None.
         """
         if not user.is_active:
+            UserCreationForm.create_activation_key(user)
+            UserCreationForm.send_activation_email(user)
+            
             raise forms.ValidationError(
                 self.error_messages['inactive'],
                 code='inactive',
             )
-            UserCreationForm.create_activation_key(self.user)
-            UserCreationForm.send_activation_email(self.user)
           
     helper = FormHelper()
     helper.form_show_labels = False
@@ -65,25 +66,41 @@ class RegistrationForm(UserCreationForm):
     
     
 class ActivationForm(forms.Form):
+    email = forms.EmailField(max_length=254, required=True)
     activation_key = forms.CharField(min_length=40, max_length=40, required=True)
     
     error_messages = {
-        'invalid_key': "This key is not valid.",
+        'invalid_key': "This email-key combination is not valid.",
         'expired_key': "This key has expired. A new key has been sent.",
     }
     
     def clean_activation_key(self):
+        email = self.cleaned_data.get('email')
         activation_key = self.cleaned_data.get('activation_key')
         
         try:
-            valid_key = ActivationKey.objects.get(value=activation_key)
-        except ActivationKey.DoesNotExist:
+            valid_user = User.objects.get(email=email)
+        except User.DoesNotExist:
             raise forms.ValidationError(
                 self.error_messages['invalid_key'],
                 code='invalid_key',
             )
         
-        self.user = valid_key.user
+        valid_key = valid_user.activationkey
+        if not valid_key:
+            raise forms.ValidationError(
+                self.error_messages['invalid_key'],
+                code='invalid_key',
+            )
+        
+        if not valid_key.value == activation_key:
+            raise forms.ValidationError(
+                self.error_messages['invalid_key'],
+                code='invalid_key',
+            )
+        
+        self.user = valid_user
+        
         if valid_key.expiration < timezone.now():
             raise forms.ValidationError(
                 self.error_messages['expired_key'],
@@ -104,6 +121,7 @@ class ActivationForm(forms.Form):
     helper = FormHelper()
     helper.form_show_labels = False
     helper.layout = Layout(
+        Field('email', placeholder='Email Address'),
         Field('activation_key', placeholder='Activation Key'),
         FormActions(
             Submit('submit', 'Submit', css_class="btn-success"),

@@ -1,5 +1,6 @@
 import hashlib
 import random
+import urlparse
 
 from django import forms
 from django.conf import settings
@@ -49,7 +50,7 @@ class UserCreationForm(forms.ModelForm):
         # Key expires in 48 hours by default.
         
         confirmation_key, _ = ActivationKey.objects.update_or_create(
-            user=user, value=activation_key)
+            user=user, defaults={'value': activation_key})
         
         return confirmation_key
     
@@ -57,14 +58,24 @@ class UserCreationForm(forms.ModelForm):
     def send_activation_email(user):
         # TODO: Use corp/alliance tag
         email_subject = "[A-NI] Activate Your Account"
+        email_url = urlparse.urlunparse((
+            'https' if settings.USE_HTTPS else 'http',
+            settings.HOST_DOMAIN,
+            resolve_url('activate'),
+            '',
+            'email={}&activation_key={}'.format(user.email, user.activationkey),
+            '',
+        ))
         email_body = ("Thanks for registering! To complete the activation of "
                       "your account please click the following link:"
-                      "\nhttp://{}{}?activation_key={}\n\nThis key will be "
+                      "\n{}\n\nThis key will be "
                       "valid for 48 hours from the time of registration."
-                      ).format(settings.HOST_DOMAIN, resolve_url('activate'), user.activationkey)
+                      ).format(email_url)
         
-        send_mail(email_subject, email_body, settings.DEFAULT_FROM_EMAIL,
-                  [user.email], fail_silently=False)
+        if settings.DEBUG: print email_body
+        else:
+            send_mail(email_subject, email_body, settings.DEFAULT_FROM_EMAIL,
+                      [user.email], fail_silently=False)
         
         return user
 
