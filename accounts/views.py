@@ -76,7 +76,7 @@ def activate(request, template_name='accounts/activate.djhtml',
             
             return HttpResponseRedirect(redirect_to)
     else:
-        form = activation_form(request.GET)
+        form = activation_form(initial=request.GET)
         
     current_site = get_current_site(request)
     

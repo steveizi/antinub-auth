@@ -6,7 +6,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.utils import timezone
 
 from accounts.admin import UserCreationForm
-from accounts.models import User
+from accounts.models import User, ActivationKey
 
 
 class LoginForm(AuthenticationForm):
@@ -74,7 +74,7 @@ class ActivationForm(forms.Form):
         'expired_key': "This key has expired. A new key has been sent.",
     }
     
-    def clean_activation_key(self):
+    def clean(self):
         email = self.cleaned_data.get('email')
         activation_key = self.cleaned_data.get('activation_key')
         
@@ -86,8 +86,9 @@ class ActivationForm(forms.Form):
                 code='invalid_key',
             )
         
-        valid_key = valid_user.activationkey
-        if not valid_key:
+        try:
+            valid_key = valid_user.activationkey
+        except ActivationKey.DoesNotExist:
             raise forms.ValidationError(
                 self.error_messages['invalid_key'],
                 code='invalid_key',

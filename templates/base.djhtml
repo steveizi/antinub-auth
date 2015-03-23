@@ -36,8 +36,8 @@
           <a class="navbar-brand" href="/">
             <img src="https://image.eveonline.com/Corporation/98199571_64.png" width="58" height="58" style="position: relative; top: -19px;">
           </a>
-          <a class="navbar-brand visible-xs-block" href="/">[A-NI]</a>
-          <a class="navbar-brand visible-sm-block visible-md-block visible-lg-block" href="/">Anti-Nub Incorporated</a>
+          <a class="navbar-brand visible-xs-block visible-sm-block" href="/">[A-NI]</a>
+          <a class="navbar-brand visible-md-block visible-lg-block" href="/">Anti-Nub Incorporated</a>
         </div><!-- navbar-header -->
         
         <div id="navbar" class="navbar-collapse collapse">
@@ -90,6 +90,10 @@
           {% block content %}{% endblock content %}
         </div><!-- col -->
       </div><!-- row -->
+      
+      <hr>
+      <footer>
+        <p class="text-right">This site is a deployment of <a href="https://github.com/randomic/antinub-auth">antinub-auth</a>, which is available under the <a href="http://opensource.org/licenses/MIT">MIT License</a>.</p>
     </div><!-- container -->
 
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
