@@ -4,11 +4,45 @@
 {% block subPageName %}apikeys{% endblock subPageName %}
 
 {% block content %}
-  <div class="panel panel-primary">
-    <div class="panel-heading">
-      <p class="panel-title">Key ID: 123456798</p>
+  <div class="jumbotron">
+    <h1>API Keys</h1>
+    <p>Here you can add, remove or update EVE Online API keys that are associated with your account.</p>
+    {% if not api_list %}
+      <p>You haven't linked any API keys yet, click below to get started.</p>
+      <p><a class="btn btn-primary btn-lg" href="#" role="button">Add an API Key</a></p>
+    {% endif %}
+  </div><!-- jumbotron -->
+  
+  {% if api_list %}
+    <h2 class="sub-header">Your keys</h2>
+    <div class="table-responsive">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>KeyID</th>
+            <th>Character(s)</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for api in api_list %}
+            <tr>
+              <td>api.key_id</td>
+              <td>api.characters</td>
+              <td>
+                <a title="Edit" class="btn btn-info btn-xs" href="#" role="button">
+                  <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
+                  <span class="sr-only">Edit</span>
+                </a>
+                <a title="Delete" class="btn btn-danger btn-xs" href="#" role="button">
+                  <span class="glyphicon glyphicon-remove-circle" aria-hidden="true"></span>
+                  <span class="sr-only">Delete</span>
+                </a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
-    <div class="panel-body">
-    </div>
-  </div><!-- panel -->
+  {% endif %}
 {% endblock content %}
