@@ -11,14 +11,14 @@ from accounts.models import User, ActivationKey
 
 class LoginForm(AuthenticationForm):
     username = forms.EmailField(max_length=254)
-    
+
     error_messages = {
         'invalid_login': "Please enter a correct email and password. "
                          "Note that both fields may be case-sensitive.",
         'inactive': "This has not yet been activated. "
                     "Another activation email has been sent.",
     }
-    
+
     def confirm_login_allowed(self, user):
         """
         Controls whether the given User may log in. This is a policy setting,
@@ -33,24 +33,24 @@ class LoginForm(AuthenticationForm):
         if not user.is_active:
             UserCreationForm.create_activation_key(user)
             UserCreationForm.send_activation_email(user)
-            
+
             raise forms.ValidationError(
                 self.error_messages['inactive'],
                 code='inactive',
             )
-          
+
     helper = FormHelper()
     helper.form_show_labels = False
     helper.layout = Layout(
         Field('username', placeholder='Email'),
         Field('password', placeholder='Password'),
         FormActions(
-                    Submit('submit', 'Submit', css_class="btn-success"),
-                    HTML("<a class='btn btn-danger' href='/'>Cancel</a>"),
-                    ),
+            Submit('submit', 'Submit', css_class="btn-success"),
+            HTML("<a class='btn btn-danger' href='/'>Cancel</a>"),
+            ),
         )
-    
-    
+
+
 class RegistrationForm(UserCreationForm):
     helper = FormHelper()
     helper.form_show_labels = False
@@ -63,21 +63,21 @@ class RegistrationForm(UserCreationForm):
             HTML("<a class='btn btn-danger' href='/'>Cancel</a>"),
         ),
     )
-    
-    
+
+
 class ActivationForm(forms.Form):
     email = forms.EmailField(max_length=254, required=True)
     activation_key = forms.CharField(min_length=40, max_length=40, required=True)
-    
+
     error_messages = {
         'invalid_key': "This email-key combination is not valid.",
         'expired_key': "This key has expired. A new key has been sent.",
     }
-    
+
     def clean(self):
         email = self.cleaned_data.get('email')
         activation_key = self.cleaned_data.get('activation_key')
-        
+
         try:
             valid_user = User.objects.get(email=email)
         except User.DoesNotExist:
@@ -85,7 +85,7 @@ class ActivationForm(forms.Form):
                 self.error_messages['invalid_key'],
                 code='invalid_key',
             )
-        
+
         try:
             valid_key = valid_user.activationkey
         except ActivationKey.DoesNotExist:
@@ -93,33 +93,36 @@ class ActivationForm(forms.Form):
                 self.error_messages['invalid_key'],
                 code='invalid_key',
             )
-        
+
         if not valid_key.value == activation_key:
             raise forms.ValidationError(
                 self.error_messages['invalid_key'],
                 code='invalid_key',
             )
-        
+
         self.user = valid_user
-        
+
         if valid_key.expiration < timezone.now():
             UserCreationForm.create_activation_key(self.user)
             UserCreationForm.send_activation_email(self.user)
-            
+
             raise forms.ValidationError(
                 self.error_messages['expired_key'],
                 code='expired_key',
             )
-        
+
         return activation_key
-    
+
     def activate(self):
-        if not self.user: return # Function has been called before validation.
-        
-        self.user.is_active = True # Activate the user
+        if not self.user: return
+        # Function has been called before validation.
+
+        self.user.is_active = True
+        # Activate the user
         self.user.save()
-        self.user.activationkey.delete() # Clear the now used activation key.
-    
+        self.user.activationkey.delete()
+        # Clear the now used activation key.
+
     helper = FormHelper()
     helper.form_show_labels = False
     helper.layout = Layout(

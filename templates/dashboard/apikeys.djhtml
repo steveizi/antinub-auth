@@ -12,7 +12,7 @@
       <p><a class="btn btn-primary btn-lg" href="#" role="button">Add an API Key</a></p>
     {% endif %}
   </div><!-- jumbotron -->
-  
+
   {% if api_list %}
     <h2 class="sub-header">Your keys</h2>
     <div class="table-responsive">

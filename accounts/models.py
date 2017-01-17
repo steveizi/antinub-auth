@@ -84,16 +84,16 @@ class User(AbstractBaseUser, PermissionsMixin):
         Sends an email to this User.
         """
         send_mail(subject, message, from_email, [self.email], **kwargs)
-    
-    
+
+
 def activation_timeout():
         # Helper function for ConfirmationKey model
         return timezone.now() + tdelta(days=settings.ACTIVATION_KEY_TIMEOUT_DAYS)
-    
+
 class ActivationKey(models.Model):
     user = models.OneToOneField(User)
     value = models.CharField(max_length=40)
     expiration = models.DateTimeField(default=activation_timeout)
-    
+
     def __str__(self):
         return self.value

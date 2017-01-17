@@ -42,18 +42,18 @@ class UserCreationForm(forms.ModelForm):
                 self.create_activation_key(user)
                 self.send_activation_email(user)
         return user
-    
+
     @staticmethod
     def create_activation_key(user):
         salt = hashlib.sha1(str(random.random())).hexdigest()[:-5]
         activation_key = hashlib.sha1(salt+user.email).hexdigest()
         # Key expires in 48 hours by default.
-        
+
         confirmation_key, _ = ActivationKey.objects.update_or_create(
             user=user, defaults={'value': activation_key})
-        
+
         return confirmation_key
-    
+
     @staticmethod
     def send_activation_email(user):
         # TODO: Use corp/alliance tag
@@ -71,12 +71,12 @@ class UserCreationForm(forms.ModelForm):
                       "\n{}\n\nThis key will be "
                       "valid for 48 hours from the time of registration."
                       ).format(email_url)
-        
+
         if settings.DEBUG: print email_body
         else:
             send_mail(email_subject, email_body, settings.DEFAULT_FROM_EMAIL,
                       [user.email], fail_silently=False)
-        
+
         return user
 
 

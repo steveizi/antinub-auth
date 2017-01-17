@@ -16,32 +16,32 @@ from accounts.forms import RegistrationForm, ActivationForm
 @csrf_protect
 @never_cache
 def register(request, template_name='accounts/register.djhtml',
-        redirect_field_name=REDIRECT_FIELD_NAME,
-        registration_form=RegistrationForm,
-        current_app=None, extra_context=None):
+             redirect_field_name=REDIRECT_FIELD_NAME,
+             registration_form=RegistrationForm,
+             current_app=None, extra_context=None):
     """
     Displays the registration form and handles the registration action.
     """
     redirect_to = request.POST.get(redirect_field_name,
                                    request.GET.get(redirect_field_name, ''))
-    
+
     if request.method == "POST":
         form = registration_form(request.POST)
         if form.is_valid():
-            
+
             # Ensure the user-originating redirection url is safe.
             if not is_safe_url(url=redirect_to, host=request.get_host()):
                 redirect_to = resolve_url(settings.ACTIVATE_URL)
-                
+
             # Register the user making sure to require email activation.
             form.save(skip_activation=False)
-            
+
             return HttpResponseRedirect(redirect_to)
     else:
         form = registration_form()
-        
+
     current_site = get_current_site(request)
-    
+
     context = {
         'form': form,
         redirect_field_name: redirect_to,
@@ -53,33 +53,34 @@ def register(request, template_name='accounts/register.djhtml',
     return TemplateResponse(request, template_name, context,
                             current_app=current_app)
 
+
 def activate(request, template_name='accounts/activate.djhtml',
-        redirect_field_name=REDIRECT_FIELD_NAME,
-        activation_form=ActivationForm,
-        current_app=None, extra_context=None):
+             redirect_field_name=REDIRECT_FIELD_NAME,
+             activation_form=ActivationForm,
+             current_app=None, extra_context=None):
     """
     Displays the activation form and handles the activation action.
     """
     redirect_to = request.POST.get(redirect_field_name,
                                    request.GET.get(redirect_field_name, ''))
-    
+
     if request.method == "POST":
-        form = activation_form(request.POST)    
+        form = activation_form(request.POST)
         if form.is_valid():
-            
+
             # Ensure the user-originating redirection url is safe.
             if not is_safe_url(url=redirect_to, host=request.get_host()):
                 redirect_to = resolve_url(settings.LOGIN_URL)
-                
+
             # Activate the user
             form.activate()
-            
+
             return HttpResponseRedirect(redirect_to)
     else:
         form = activation_form(initial=request.GET)
-        
+
     current_site = get_current_site(request)
-    
+
     context = {
         'form': form,
         redirect_field_name: redirect_to,
